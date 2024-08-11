@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login Page</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #333;
+            color: #fff;
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+        .container {
+            background: #444;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.5);
+        }
+        h1 {
+            margin-bottom: 20px;
+        }
+        .input-field {
+            margin-bottom: 20px;
+        }
+        .input-field input {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #555;
+            border-radius: 5px;
+            background: #222;
+            color: #fff;
+        }
+        .input-field input::placeholder {
+            color: #888;
+        }
+        .button {
+            width: 100%;
+            padding: 10px;
+            border: none;
+            border-radius: 5px;
+            background: #4CAF50;
+            color: #fff;
+            cursor: pointer;
+            font-size: 1em;
+        }
+        .button:hover {
+            background: #45a049;
+        }
+        #error-message {
+            color: red;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Login</h1>
+        <div class="input-field">
+            <input type="text" id="username" placeholder="Username">
+        </div>
+        <div class="input-field">
+            <input type="password" id="password" placeholder="Password">
+        </div>
+        <button class="button" id="login-button">Login</button>
+        <div id="error-message"></div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js";
+        import { getDatabase, ref, child, get } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-database.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyBV42AcIhfJ75A9W_7OL7DmzxbLQpAz5N8",
+            authDomain: "ebeee-d879a.firebaseapp.com",
+            projectId: "ebeee-d879a",
+            storageBucket: "ebeee-d879a.appspot.com",
+            messagingSenderId: "96299287973",
+            appId: "1:96299287973:web:6b3d66b5ca70d95f82144c",
+            measurementId: "G-2ZSKNHZ2C6"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const database = getDatabase(app);
+
+        function handleLogin() {
+            const username = document.getElementById('username').value.trim();
+            const password = document.getElementById('password').value.trim();
+
+            if (username && password) {
+                loginUser(username, password);
+            } else {
+                showError("Please enter both username and password.");
+            }
+        }
+
+        function loginUser(username, password) {
+            const dbRef = ref(database);
+            console.log('Attempting to login with username:', username);
+            get(child(dbRef, `users/${username}`)).then((snapshot) => {
+                if (snapshot.exists()) {
+                    const userData = snapshot.val();
+                    console.log('User data retrieved:', userData);
+                    if (userData.password === password) {
+                        localStorage.setItem('username', username);
+                        window.location.href = "man.html";
+                    } else {
+                        showError("Incorrect password.");
+                    }
+                } else {
+                    showError("Username does not exist.");
+                }
+            }).catch((error) => {
+                console.error('Error during login:', error);
+                showError("Error logging in. Please try again.");
+            });
+        }
+
+        function showError(message) {
+            const errorMessage = document.getElementById('error-message');
+            errorMessage.textContent = message;
+        }
+
+        document.getElementById('login-button').addEventListener('click', handleLogin);
+    </script>
+</body>
+</html>
